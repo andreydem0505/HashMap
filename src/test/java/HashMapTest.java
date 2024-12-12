@@ -71,6 +71,24 @@ public class HashMapTest {
     }
 
     @Test
+    public void testPuttingInOneBucket() {
+        Map<String, Integer> map = new HashMap<>(1);
+        map.put("milk", 1);
+        map.put("coffee", 2);
+        map.put("juice", 3);
+        map.put("cola", 4);
+        map.put("tea", 5);
+        map.put("wine", 6);
+        map.put("beer", 7);
+        map.put("sprite", 8);
+        map.put("water", 9);
+        map.put("jelly", 10);
+        map.put("cocoa", 11);
+        Assertions.assertEquals(11, map.size());
+        Assertions.assertEquals(11, map.keySet().size());
+    }
+
+    @Test
     public void testRewriting() {
         Map<String, Integer> map = new HashMap<>();
         Integer result = map.put("a", 1);
@@ -185,14 +203,14 @@ public class HashMapTest {
     }
 
     @Test
-    public void testUnequalsWithDifferentCapacity() {
+    public void testEqualsWithDifferentCapacity() {
         Map<String, Integer> map1 = new HashMap<>(10);
         map1.put("milk", 1);
         map1.put("coffee", 2);
         Map<String, Integer> map2 = new HashMap<>(20);
         map2.put("milk", 1);
         map2.put("coffee", 2);
-        Assertions.assertNotEquals(map1, map2);
+        Assertions.assertEquals(map1, map2);
     }
 
     @Test

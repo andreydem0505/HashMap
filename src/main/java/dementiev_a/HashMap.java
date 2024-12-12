@@ -5,6 +5,7 @@ import java.util.*;
 public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
     private MapEntry<K, V>[] table;
     private int size;
+    private final int MAX_BUCKET_SIZE = 10;
 
     public HashMap(int capacity) {
         if (capacity <= 0)
@@ -25,8 +26,6 @@ public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
 
     @Override
     public boolean containsKey(Object k) {
-        if (k == null) throw new NullPointerException();
-
         MapEntry<K, V> entry = table[Math.abs(k.hashCode()) % table.length];
         while (entry != null) {
             if (entry.getKey().equals(k)) return true;
@@ -53,8 +52,6 @@ public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
 
     @Override
     public V get(Object k) {
-        if (k == null) throw new NullPointerException();
-
         MapEntry<K, V> entry = table[Math.abs(k.hashCode()) % table.length];
         while (entry != null) {
             if (entry.getKey().equals(k)) return entry.getValue();
@@ -71,8 +68,6 @@ public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
 
     @Override
     public V put(K k, V v) {
-        if (k == null) throw new NullPointerException();
-
         int index = Math.abs(k.hashCode()) % table.length;
         MapEntry<K, V> entry = table[index];
         if (entry == null) {
@@ -80,6 +75,7 @@ public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
             size++;
             return null;
         }
+        int counter = 1;
         while (true) {
             if (entry.getKey().equals(k)) {
                 V lastValue = entry.getValue();
@@ -88,9 +84,18 @@ public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
             }
             if (entry.getNext() == null) break;
             entry = entry.getNext();
+            counter++;
         }
         entry.setNext(new MapEntry<>(k, v));
+        counter++;
         size++;
+        if (counter > MAX_BUCKET_SIZE) {
+            HashMap<K, V> newMap = new HashMap<>(table.length * 2);
+            newMap.putAll(this);
+            table = new MapEntry[table.length * 2];
+            clear();
+            putAll(newMap);
+        }
         return null;
     }
 
@@ -127,8 +132,6 @@ public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
 
     @Override
     public V remove(Object k) {
-        if (k == null) throw new NullPointerException();
-
         int index = Math.abs(k.hashCode()) % table.length;
         MapEntry<K, V> entry = table[index];
         if (entry == null) return null;
@@ -170,7 +173,12 @@ public class HashMap<K, V> implements Map<K, V>, Iterable<Entry<K, V>> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof HashMap<?, ?> hashMap)) return false;
-        return Objects.deepEquals(table, hashMap.table);
+        Set<K> keys = keySet();
+        if (!keys.equals(hashMap.keySet())) return false;
+        for (K key : keys) {
+            if (!get(key).equals(hashMap.get(key))) return false;
+        }
+        return true;
     }
 
     @Override
